@@ -26,7 +26,8 @@
       "extensions": [
         "ms-azuretools.vscode-azurefunctions",
         "ms-azuretools.vscode-docker",
-        "ms-python.python"
+        "ms-python.python",
+        "bradlc.vscode-tailwindcss"
       ]
     }
   }
