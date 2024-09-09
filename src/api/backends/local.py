@@ -61,7 +61,8 @@ def connect(database = 'dev.db') -> "sqlite3.Connection":
         if HAS_FTS5:
             # Create a FTS5 virtual table for full-text search
             conn.execute("""create virtual table productFtsIndex using fts5(name, description, content='products', content_rowid='id');""")
-        
+            logging.info("Created products vtable index")
+
     # Load the test data from ../data/test.json
     with open('data/test.json') as f:
         data = json.load(f)

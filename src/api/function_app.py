@@ -41,6 +41,11 @@ def image_trigger(imageblob: func.InputStream):
     logging.info(f"Python blob trigger function processing blob"
                 f"Name: {imageblob.name}"
                 f"Blob Size: {imageblob.length} bytes")
+    # 1. Create an embedding from the file
+
+    # 2. Save the embedding to the database
+
+    # 3. Return the URL of the image and the embedding
 
 
 def prep_search(query: str) -> str:
@@ -71,9 +76,9 @@ def prep_search(query: str) -> str:
             "content": f"Generate a search query for: {query}"
         }],
         max_tokens=100, # maximum number of tokens to generate
-        temperature=0.0, # no randomness, please be deterministic
         n=1, # return only one completion
         stop=None, # stop at the end of the completion
+        top_p=0.95,
         stream=False # return the completion as a single string
     )
     search_query = completion.choices[0].message.content

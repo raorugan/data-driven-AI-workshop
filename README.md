@@ -1,5 +1,16 @@
 # Data Driven AI Workshop
 
+## Query Preparation Stage
+
+### Example prompts
+
+```default
+Generate a full-text search query for a SQL database based on a user question. 
+Do not generate the whole SQL query; only generate string to go inside the MATCH parameter for FTS5 indexes. 
+Use SQL boolean operators if the user has been specific about what they want to exclude in the search, only use the AND operator for nouns, for descriptive adjectives use OR.
+If the question is not in English, translate the question to English before generating the search query.
+If you cannot generate a search query, return just the number 0.
+```
 
 ## Uploading images
 
