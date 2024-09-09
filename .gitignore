@@ -3,6 +3,9 @@ __pycache__
 *.egg-info
 
 __azurite_*.json
-__blobstorage_/
+__blobstorage__/
+__queuestorage__/
+__tablestorage__/
+
 src/api/dev.db
 src/api/dev.db-journal

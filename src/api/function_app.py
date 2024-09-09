@@ -99,7 +99,8 @@ def search(req: func.HttpRequest) -> func.HttpResponse:
         )
 
     if not client: # If not using OpenAI for now, just use the query as is
-        fts_query = query 
+        fts_query = query
+        logging.info(f"Using query as is: {fts_query}")
     else:
         fts_query = prep_search(query)
 

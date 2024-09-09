@@ -15,6 +15,7 @@ import numpy as np
 from .models import Product
 
 HAS_FTS5 = False
+SIMILARITY_THRESHOLD = 0.77
 
 
 def cosine_similarity(a: list[float], b: list[float]) -> float:
@@ -89,13 +90,13 @@ def search_products(connection: "sqlite3.Connection", query: str, fts_query: str
         similarity = cosine_similarity(embedding, [float(a) for a in result[5].split(',')])
 
         # A crude cutoff filter. 
-        if similarity > 0.8:
+        if similarity > SIMILARITY_THRESHOLD:
             distances.append((similarity, tuple(result[0:5])))
     
     # Sort the results by similarity, descending.
     distances = sorted(distances, key=lambda x: x[0], reverse=True)
 
-    logging.info(f"Found {len(distances)} results with similarity > 0.8")
+    logging.info(f"Found {len(distances)} results with similarity > {SIMILARITY_THRESHOLD}")
 
     # Search the productFtsIndex table for the query
     cursor = sqlite3.connect('dev.db').cursor()
