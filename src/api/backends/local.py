@@ -79,7 +79,7 @@ def connect(database = 'dev.db') -> "sqlite3.Connection":
 
     return conn
 
-def search_products(connection: "sqlite3.Connection", query: str, fts_query: str, embedding: list[float]) -> list[Product]:
+def search_products(query: str, fts_query: str, embedding: list[float]) -> list[Product]:
     cursor = connect(':memory:').cursor()
     
     # Do a vector search. This is sqlite and we don't have a vector index, so do a similarity on ALL of them
