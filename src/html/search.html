@@ -30,8 +30,8 @@
         </div>
 
         <div class="flex items-center">
-          <a href="index.html" class="text-white mx-2" data-language-key="home">Home</a>
-          <a href="search.html" class="text-white mx-2" data-language-key="search">Search</a>
+          <a href="index.html" class="text-white mx-2" data-translate-key="home">Home</a>
+          <a href="search.html" class="text-white mx-2" data-translate-key="search">Search</a>
 
           <!-- Language Switcher -->
           <div class="relative">
@@ -41,42 +41,19 @@
             >
               <span class="fa fa-globe" aria-level="Language"></span>
             </button>
-            <div
-              class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg hidden"
-              id="language-menu"
-            >
-              <a
-                href="?lang=en"
-                class="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >English</a
-              >
-              <a
-                href="?lang=es"
-                class="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >Español</a
-              >
-              <a
-                href="?lang=fr"
-                class="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >Français</a
-              >
-              <a
-                href="?lang=de"
-                class="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >Deutsch</a
-              >
-              <a
-                href="?lang=ja"
-                class="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                >日本</a
-              >
+            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg hidden" id="language-menu">
+              <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-200" data-lang="en">English</a>
+              <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-200" data-lang="es">Español</a>
+              <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-200" data-lang="fr">Français</a>
+              <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-200" data-lang="de">Deutsch</a>
+              <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-200" data-lang="ja">日本</a>
             </div>
           </div>
         </div>
       </div>
     </nav>
     <main class="container mx-auto p-4">
-      <h1 class="text-2xl font-bold mb-4" data-language-key="search">Search</h1>
+      <h1 class="text-2xl font-bold mb-4" data-translate-key="search">Search</h1>
       <form
         class="flex items-center"
         hx-post="http://localhost:7071/api/search"
@@ -87,21 +64,26 @@
         <input
           type="text"
           name="query"
-          class="w-3/4 p-4 border border-gray-300 rounded-l h-12"
+          class="w-2/5 p-4 border border-gray-300 rounded-l h-12"
           placeholder="Search for products..."
         />
         <!-- Developer Options -->
-        <select name="similarity-mode" id="similarity-mode" class="w-1/4 p-1 border border-gray-300 h-12">
+        <select name="similarity-mode" id="similarity-mode" class="w-1/5 p-1 border border-gray-300 h-12">
           <option selected value="similarity-original">Run similarity on original query</option>
           <option value="similarity-processed">Run similarity on processed query</option>
-       </select>
+        </select>
 
-        <button class="bg-chestnut-500 text-white px-4 py-2 rounded-r h-12" data-language-key="search">
+        <select name="embedding-model" id="embedding-model" class="w-1/5 p-1 border border-gray-300 h-12">
+          <option selected value="text-embedding-ada-002">text-embedding-ada-002</option>
+          <option value="text-embedding-3-large">text-embedding-3-large</option>
+        </select>
+
+        <button class="bg-chestnut-500 w-1/5 text-white px-4 py-2 rounded-r h-12" data-translate-key="search">
           Search
         </button>
       </form>
 
-      <h2 class="text-2xl font-bold mt-8 mb-4" data-language-key="searchResults">Search Results</h2>
+      <h2 class="text-2xl font-bold mt-8 mb-4" data-translate-key="searchResults">Search Results</h2>
       <div class="hidden" id="search-results-container">
         <p><span id="search-keywords"></span></p>
         <div id="search-results" class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -125,7 +107,7 @@
             productDiv.className = "bg-white p-4 shadow-md";
             productDiv.innerHTML = `
             <img src="images/products/${product.image}" alt="${product.description}" class="w-full h-92 object-contain mb-4">
-            <h3 class="text-xl font-bold">${product.name}</h3>
+            <h3 class="text-xl font-bold">${product.name} (${Math.round(product.similarity*100)}% Match)</h3>
             <p class="text-lg">${product.description} $${product.price}</p>
             <button class="bg-blue-500 text-white px-4 py-2 mt-4">Add to Cart</button>
           `;
