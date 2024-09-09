@@ -28,9 +28,9 @@ else:
 completions_deployment = os.getenv("CHAT_DEPLOYMENT_NAME", "gpt-35-turbo")
 
 if DEVELOPMENT:
-    from backends.local import connect, search_products
+    from backends.local import search_products
 else:
-    from backends.azure_cosmos import connect, search_products
+    from backends.azure_cosmos import search_products
 
 app = func.FunctionApp()
 

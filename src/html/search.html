@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link href="css/output.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
   <title>Wide World Importers - Search</title>
 </head>
 <body class="bg-gray-100 text-gray-900">
@@ -14,9 +16,24 @@
         <img src="images/logo.png" alt="Wide World Importers Logo" class="h-10 w-10 mr-2">
         <a href="#" class="text-white text-2xl font-bold">Wide World Importers</a>
       </div>
-      <div>
+
+      <div class="flex items-center">
         <a href="index.html" class="text-white mx-2">Home</a>
         <a href="search.html" class="text-white mx-2">Search</a>
+        
+        <!-- Language Switcher -->
+        <div class="relative">
+          <button class="text-white mx-2 focus:outline-none" id="language-button">
+            <span class="fa fa-globe" aria-level="Language"></span>
+          </button>
+          <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg hidden" id="language-menu">
+            <a href="?lang=en" class="block px-4 py-2 text-gray-800 hover:bg-gray-200">English</a>
+            <a href="?lang=es" class="block px-4 py-2 text-gray-800 hover:bg-gray-200">Español</a>
+            <a href="?lang=fr" class="block px-4 py-2 text-gray-800 hover:bg-gray-200">Français</a>
+            <a href="?lang=de" class="block px-4 py-2 text-gray-800 hover:bg-gray-200">Deutsch</a>
+            <a href="?lang=ja" class="block px-4 py-2 text-gray-800 hover:bg-gray-200">日本</a>
+          </div>
+        </div>
       </div>
     </div>
   </nav>
@@ -53,6 +70,12 @@
           resultsContainer.appendChild(productDiv);
         });
       }
+    });
+  </script>
+  <script>
+    document.getElementById('language-button').addEventListener('click', function() {
+      var menu = document.getElementById('language-menu');
+      menu.classList.toggle('hidden');
     });
   </script>
 </body>

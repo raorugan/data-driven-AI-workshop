@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link href="css/output.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
   <title>Wide World Importers</title>
 </head>
 <body class="bg-gray-100 text-gray-900">
@@ -14,41 +16,76 @@
         <img src="images/logo.png" alt="Wide World Importers Logo" class="h-10 w-10 mr-2">
         <a href="#" class="text-white text-2xl font-bold">Wide World Importers</a>
       </div>
-      <div>
+      
+      <div class="flex items-center">
         <a href="index.html" class="text-white mx-2">Home</a>
         <a href="search.html" class="text-white mx-2">Search</a>
+        
+        <!-- Language Switcher -->
+        <div class="relative">
+          <button class="text-white mx-2 focus:outline-none" id="language-button">
+            <span class="fa fa-globe"> </span>
+          </button>
+          <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg hidden" id="language-menu">
+            <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-200" data-lang="en">English</a>
+            <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-200" data-lang="es">Español</a>
+            <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-200" data-lang="fr">Français</a>
+            <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-200" data-lang="de">Deutsch</a>
+            <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-200" data-lang="ja">日本</a>
+          </div>
+        </div>
       </div>
     </div>
   </nav>
   <main class="container mx-auto p-4">
-    <h1 class="text-4xl font-bold mb-4">Welcome to Wide World Importers</h1>
-    <p class="text-lg">
+    <h1 class="text-4xl font-bold mb-4" data-translate-key="welcome">Welcome to Wide World Importers</h1>
+    <p class="text-lg" data-translate-key="description">
       Wide World Importers is your go-to source for the finest imported goods from around the globe. 
       We pride ourselves on offering a diverse selection of products that cater to all tastes and preferences. 
       Whether you're looking for unique home decor, gourmet foods, or the latest in fashion, 
       Wide World Importers has something for everyone. Explore our extensive catalog and discover the world of possibilities.
     </p>
-
-    <h2 class="text-2xl font-bold mt-8 mb-4">Featured Products</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-white p-4 shadow-md">
-        <img src="images/products/man-2336071_1280.jpg" alt="Product 1" class="w-full h-92 object-contain mb-4">
-        <h3 class="text-xl font-bold">Forest Green Check Shirt</h3>
-        <p class="text-lg">$19.99</p>
-        <button class="bg-chestnut-500 text-white px-4 py-2 mt-4">Add to Cart</button>
-      </div>
-      <div class="bg-white p-4 shadow-md">
-        <img src="images/products/red_top.jpg" alt="Product 2" class="w-full h-92 object-contain mb-4">
-        <h3 class="text-xl font-bold">Burgundy Top</h3>
-        <p class="text-lg">$24.99</p>
-        <button class="bg-chestnut-500 text-white px-4 py-2 mt-4">Add to Cart</button>
-      </div>
-      <div class="bg-white p-4 shadow-md">
-        <img src="images/products/woman-7633843_1280.jpg" alt="Product 3" class="w-full h-92 object-contain mb-4">
-        <h3 class="text-xl font-bold">Teal Dress</h3>
-        <p class="text-lg">$29.99</p>
-        <button class="bg-chestnut-500 text-white px-4 py-2 mt-4">Add to Cart</button>
-      </div>
+    <div class="bg-white p-4 shadow-md">
+      <img src="images/products/red_top.jpg" alt="Product 2" class="w-full h-92 object-contain mb-4">
+      <h3 class="text-xl font-bold" data-translate-key="product1">Burgundy Top</h3>
+      <p class="text-lg">$24.99</p>
+      <button class="bg-chestnut-500 text-white px-4 py-2 mt-4" data-translate-key="addToCart">Add to Cart</button>
+    </div>
+    <div class="bg-white p-4 shadow-md">
+      <img src="images/products/woman-7633843_1280.jpg" alt="Product 3" class="w-full h-92 object-contain mb-4">
+      <h3 class="text-xl font-bold" data-translate-key="product2">Teal Dress</h3>
+      <p class="text-lg">$29.99</p>
+      <button class="bg-chestnut-500 text-white px-4 py-2 mt-4" data-translate-key="addToCart">Add to Cart</button>
+    </div>
+  </div>
   </main>
+
+  <script>
+    document.getElementById('language-button').addEventListener('click', function() {
+      var menu = document.getElementById('language-menu');
+      menu.classList.toggle('hidden');
+    });
+
+    function loadTranslations(lang) {
+      fetch('translations.json')
+        .then(response => response.json())
+        .then(translations => {
+          document.querySelectorAll('[data-translate-key]').forEach(element => {
+            const key = element.getAttribute('data-translate-key');
+            element.textContent = translations[lang][key];
+          });
+        })
+        .catch(error => console.error('Error loading translations:', error));
+    }
+
+    document.querySelectorAll('#language-menu a').forEach(link => {
+      link.addEventListener('click', function(event) {
+        event.preventDefault();
+        const lang = this.getAttribute('data-lang');
+        loadTranslations(lang);
+      });
+    });
+  </script>
 </body>
 </html>
