@@ -91,18 +91,10 @@ def fetch_embedding(input: str) -> list[float]:
                     route="search")
 def search(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("Python HTTP trigger function processed a request.")
-    query = req.params.get('query')
+    query = req.form.get('query')
     if not query:
-        try:
-            req_body = req.get_json()
-        except ValueError:
-            pass
-        else:
-            query = req_body.get('query')
-
-    if not query:
-        return func.HttpResponse(
-            "Please pass a query on the query string or in the request body",
+        return func.HttpRequest(
+            "{'error': 'Please pass a query on the query string or in the request body'}",
             status_code=400
         )
 
@@ -111,9 +103,13 @@ def search(req: func.HttpRequest) -> func.HttpResponse:
     else:
         fts_query = prep_search(query)
 
-    sql_results = search_products(database_connection, query, fts_query, fetch_embedding(query))
+    sql_results = search_products(database_connection, query, fts_query, fetch_embedding(fts_query))
 
-    return func.HttpResponse(f"Searching for: {query} / {fts_query}. Found {sql_results} results.")
+    return func.HttpResponse(json.dumps({
+        "keywords": fts_query,
+        "results": [product.model_dump() for product in sql_results]
+        }
+    ))
 
 
 @app.route(methods=["get"], auth_level="function",

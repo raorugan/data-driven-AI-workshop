@@ -22,30 +22,38 @@
   </nav>
   <main class="container mx-auto p-4">
     <h1 class="text-4xl font-bold mb-4">Search</h1>
-    <form class="flex items-center">
-      <input type="text" class="w-full p-4 border border-gray-300 rounded-l" placeholder="Search for products...">
+    <form class="flex items-center" hx-post="http://localhost:7071/api/search" hx-trigger="submit" hx-target="#search-results" hx-swap="innerHTML">
+      <input type="text" name="query" class="w-full p-4 border border-gray-300 rounded-l" placeholder="Search for products...">
       <button class="bg-chestnut-500 text-white px-4 py-2 rounded-r">Search</button>
     </form>
-    <!-- <h2 class="text-2xl font-bold mt-8 mb-4">Search Results</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-white p-4 shadow-md">
-        <img src="images/product1.jpg" alt="Product 1" class="w-full h-48 object-cover mb-4">
-        <h3 class="text-xl font-bold">Product 1</h3>
-        <p class="text-lg">$19.99</p>
-        <button class="bg-blue-500 text-white px-4 py-2 mt-4">Add to Cart</button>
-      </div>
-      <div class="bg-white p-4 shadow-md">
-        <img src="images/product2.jpg" alt="Product 2" class="w-full h-48 object-cover mb-4">
-        <h3 class="text-xl font-bold">Product 2</h3>
-        <p class="text-lg">$24.99</p>
-        <button class="bg-blue-500 text-white px-4 py-2 mt-4">Add to Cart</button>
-      </div>
-      <div class="bg-white p-4 shadow-md">
-        <img src="images/product3.jpg" alt="Product 3" class="w-full h-48 object-cover mb-4">
-        <h3 class="text-xl font-bold">Product 3</h3>
-        <p class="text-lg">$29.99</p>
-        <button class="bg-blue-500 text-white px-4 py-2 mt-4">Add to Cart</button>
-      </div> -->
+
+    <h2 class="text-2xl font-bold mt-8 mb-4">Search Results</h2>
+    <div id="search-results" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Search results will be injected here -->
+    </div>
   </main>
+  <script src="https://unpkg.com/htmx.org@1.6.1"></script>
+  <script>
+    document.body.addEventListener('htmx:afterRequest', (event) => {
+      if (event.detail.target.id === 'search-results') {
+        const results = event.detail.xhr.response;
+        const resultsContainer = document.getElementById('search-results');
+        var result = JSON.parse(results);
+        resultsContainer.innerHTML = `<p>Searched for: <span id="search-keywords">${result.keywords}</span></p>`; // Clear previous results
+
+        result.results.forEach(product => {
+          const productDiv = document.createElement('div');
+          productDiv.className = 'bg-white p-4 shadow-md';
+          productDiv.innerHTML = `
+            <img src="images/products/${product.image}" alt="${product.description}" class="w-full h-92 object-contain mb-4">
+            <h3 class="text-xl font-bold">${product.name}</h3>
+            <p class="text-lg">${product.description} $${product.price}</p>
+            <button class="bg-blue-500 text-white px-4 py-2 mt-4">Add to Cart</button>
+          `;
+          resultsContainer.appendChild(productDiv);
+        });
+      }
+    });
+  </script>
 </body>
 </html>

@@ -108,11 +108,13 @@ def search_products(connection: "sqlite3.Connection", query: str, fts_query: str
 
     # Combine the results from the FTS5 search and the vector search
     results = []
+    found_ids = []
     for product in fts_results:
         results.append(Product(id=product[0], name=product[1], description=product[2], price=product[3], image=product[4], embedding=None))
+        found_ids.append(product[0])
 
     for _, product in distances:
-        if product[0] not in [r[0] for r in results]:
+        if product[0] not in found_ids:
             results.append(Product(id=product[0], name=product[1], description=product[2], price=product[3], image=product[4], embedding=None))
 
     return results
