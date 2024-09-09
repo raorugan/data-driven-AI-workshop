@@ -102,13 +102,13 @@ def search(req: func.HttpRequest) -> func.HttpResponse:
             status_code=400
         )
 
-    if not client: # If not using OpenAI for now, just use the query as is
-        fts_query = query
-        logging.info(f"Using query as is: {fts_query}")
+    fts_query = prep_search(query)
+    if req.form.get('similarity-mode', 'similarity-processed') == 'similarity-processed':
+        embedding = fetch_embedding(fts_query)
     else:
-        fts_query = prep_search(query)
+        embedding = fetch_embedding(query)
 
-    sql_results = search_products(query, fts_query, fetch_embedding(query))
+    sql_results = search_products(query, fts_query, embedding)
 
     return func.HttpResponse(json.dumps({
         "keywords": fts_query,
