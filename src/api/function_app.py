@@ -108,7 +108,7 @@ def search(req: func.HttpRequest) -> func.HttpResponse:
     else:
         fts_query = prep_search(query)
 
-    sql_results = search_products(query, fts_query, fetch_embedding(fts_query))
+    sql_results = search_products(query, fts_query, fetch_embedding(query))
 
     return func.HttpResponse(json.dumps({
         "keywords": fts_query,
