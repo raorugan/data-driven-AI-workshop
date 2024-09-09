@@ -33,7 +33,6 @@ else:
     from backends.azure_cosmos import connect, search_products
 
 app = func.FunctionApp()
-database_connection = connect()
 
 @app.blob_trigger(arg_name="imageblob", path="uploads",
                   connection="ImagesConnection") 
@@ -109,7 +108,7 @@ def search(req: func.HttpRequest) -> func.HttpResponse:
     else:
         fts_query = prep_search(query)
 
-    sql_results = search_products(database_connection, query, fts_query, fetch_embedding(fts_query))
+    sql_results = search_products(query, fts_query, fetch_embedding(fts_query))
 
     return func.HttpResponse(json.dumps({
         "keywords": fts_query,
@@ -118,7 +117,7 @@ def search(req: func.HttpRequest) -> func.HttpResponse:
     ))
 
 
-@app.route(methods=["get"], auth_level="function",
+@app.route(methods=["get"], auth_level="anonymous",
            route="seed_embeddings")
 def seed_embeddings(req: func.HttpRequest) -> func.HttpResponse:
     # Seed the embeddings for the products in the database by calling the OpenAI API

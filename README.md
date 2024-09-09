@@ -1,5 +1,60 @@
 # Data Driven AI Workshop
 
+## Running the web server
+
+```console
+npm install -g http-server
+```
+
+```console
+http-server src/html
+```
+
+## Running the API (Functions Host)
+
+The easiest way to run the functions host is from VS Code.
+
+Click on Run and Debug and launch the "Attach to Python Functions" launch task.
+
+## Running the API (console)
+
+To launch the functions host from the CLI, run the following command:
+
+```console
+func host start
+```
+
+## Making test data
+
+```default
+Can you generate 10 fictional products for a clothing store in JSON. The products have the fields name, description and price. 
+```
+
+For example:
+
+```json
+{ 
+    "id": 10,
+    "name": "Eco-Friendly T-Shirt",  
+    "description": "A soft, organic green cotton t-shirt that's perfect for everyday wear.",  
+    "price": 25.99,
+    "image": "10.jpeg",
+    "embedding": null
+  },  
+  {  
+    "id": 11,
+    "name": "Vintage Denim Jacket",  
+    "description": "A classic denim jacket with a retro design and a modern fit.",  
+    "price": 89.99,
+    "image": "11.jpeg",
+    "embedding": null
+  }
+  ```
+
+
+For each item, put it into the `api/data/test.json` file and run the `seed_embeddings` function from an API call.
+This will calculate the embeddings for each item that does not have an embedding field..
+
 ## Query Preparation Stage
 
 ### Example prompts
