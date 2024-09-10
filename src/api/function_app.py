@@ -65,13 +65,25 @@ def prep_search(query: str) -> str:
             "role": "system",
             "content": 
             """  
-                Generate a full-text search query for a SQL database based on a user question. 
+                Generate a full-text search query for a SQL database based on a user query. 
                 Do not generate the whole SQL query; only generate string to go inside the MATCH parameter for FTS5 indexes. 
                 Use SQL boolean operators if the user has been specific about what they want to exclude in the search.
-                If the question is not in English, translate the question to English before generating the search query.
+                If the query is not in English, always translate the query to English.
                 If you cannot generate a search query, return just the number 0.
             """
-        }, 
+        },
+        {   "role": "user",
+            "content": f"Generate a search query for: A really nice winter jacket"
+        },
+        {  "role": "assistant",
+            "content": "winter jacket"
+        },
+        {   "role": "user",
+            "content": "Generate a search query for: 夏のドレス"
+        },
+        {   "role": "assistant",
+            "content": "summer dress"
+        },
         {
             "role": "user",
             "content": f"Generate a search query for: {query}"
@@ -80,7 +92,8 @@ def prep_search(query: str) -> str:
         n=1, # return only one completion
         stop=None, # stop at the end of the completion
         temperature=0.3, # more predictable
-        stream=False # return the completion as a single string
+        stream=False, # return the completion as a single string
+        seed=1, # seed for reproducibility
     )
     search_query = completion.choices[0].message.content
     ### End of implementation

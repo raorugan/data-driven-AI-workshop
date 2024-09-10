@@ -15,7 +15,7 @@ import numpy as np
 from .models import ProductWithSimilarity
 
 HAS_FTS5 = False
-SIMILARITY_THRESHOLD = 0.77
+SIMILARITY_THRESHOLD = 0.2
 
 
 def cosine_similarity(a: list[float], b: list[float]) -> float:
