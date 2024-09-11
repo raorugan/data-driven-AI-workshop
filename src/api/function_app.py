@@ -5,6 +5,7 @@ import json
 from azure.identity import AzureCliCredential, get_bearer_token_provider
 from openai import AzureOpenAI
 import os
+from base64 import b64encode
 
 client: AzureOpenAI
 DEVELOPMENT = os.getenv("DEVELOPMENT", True)
@@ -125,6 +126,61 @@ def search(req: func.HttpRequest) -> func.HttpResponse:
         "results": [product.model_dump() for product in sql_results]
         }
     ))
+
+
+@app.route(methods=['post'], auth_level="anonymous",
+           route="match")
+def match(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Matches the image upload with the product in the database with the closest embedding.
+    """
+    image = req.files.get('image_upload')
+    if not image:
+        return func.HttpResponse(
+            "{'error': 'Please pass an image in the request body'}",
+            status_code=400
+        )
+    image_contents = image.stream.read()
+    image_type = image.mimetype
+
+    base64_image = b64encode(image_contents).decode('utf-8')
+
+    # 1. Ask the model to describe the image
+    description = client.chat.completions.create(
+        model=completions_deployment,
+        messages= [
+        {
+            "role": "system",
+            "content": 
+            """  
+                Generate a text description the clothes worn by the person in the image.
+            """
+        },
+        {   
+            "role": "user",
+            "content": [
+                { "type": "text", "content": "Describe the clothes in this image" },
+                { "type": "image_url", "image_url": { "url": f"data:{image_type};base64,{base64_image}" } }
+            ]
+        }
+        ],
+        max_tokens=500, # maximum number of tokens to generate
+        n=1, # return only one completion
+        stop=None, # stop at the end of the completion
+        temperature=0.3, # more predictable
+        stream=False, # return the completion as a single string
+        seed=1, # seed for reproducibility
+    )
+    image_description = description.choices[0].message.content
+    text_embedding = fetch_embedding(image_description)
+
+    # Do a product search with the text embedding
+    sql_results = search_products(image_description, image_description, text_embedding)
+
+    return func.HttpResponse(json.dumps({
+        "keywords": image_description,
+        "results": [product.model_dump() for product in sql_results],
+        }))
 
 
 @app.route(methods=["get"], auth_level="anonymous",

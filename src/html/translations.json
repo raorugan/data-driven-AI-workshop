@@ -7,7 +7,8 @@
     "product1": "Burgundy Top",
     "product2": "Teal Dress",
     "addToCart": "Add to Cart",
-    "searchResults": "Search Results"
+    "searchResults": "Search Results",
+    "match": "Match Outfit"
   },
   "es": {
     "home": "Inicio",
@@ -17,7 +18,8 @@
     "product1": "Top Burdeos",
     "product2": "Vestido Teal",
     "addToCart": "Añadir al carrito",
-    "searchResults": "Resultados de la búsqueda"
+    "searchResults": "Resultados de la búsqueda",
+    "match": "Combinar atuendo"
   },
   "fr": {
     "home": "Accueil",
@@ -27,7 +29,8 @@
     "product1": "Top Bourgogne",
     "product2": "Robe Teal",
     "addToCart": "Ajouter au panier",
-    "searchResults": "Résultats de la recherche"
+    "searchResults": "Résultats de la recherche",
+    "match": "Associer tenue"
   },
   "de": {
     "home": "Startseite",
@@ -37,7 +40,8 @@
     "product1": "Burgunder Top",
     "product2": "Teal Kleid",
     "addToCart": "In den Warenkorb",
-    "searchResults": "Suchergebnisse"
+    "searchResults": "Suchergebnisse",
+    "match": "Outfit kombinieren"
   },
   "ja": {
     "home": "ホーム",
@@ -47,7 +51,8 @@
     "product1": "バーガンディトップ",
     "product2": "ティールドレス",
     "addToCart": "カートに追加",
-    "searchResults": "検索結果"
+    "searchResults": "検索結果",
+    "match": "マッチング服"
   },
   "hi": {
     "home": "होम",
@@ -57,6 +62,7 @@
     "product1": "बरगंडी टॉप",
     "product2": "टील ड्रेस",
     "addToCart": "कार्ट में जोड़ें",
-    "searchResults": "खोज के परिणाम"
+    "searchResults": "खोज के परिणाम",
+    "match": "मैच आउटफिट"
   }
 }

@@ -55,24 +55,21 @@
       </div>
     </nav>
     <main class="container mx-auto p-4">
-      <h1 class="text-2xl font-bold mb-4" data-translate-key="search">Search</h1>
+      <h1 class="text-2xl font-bold mb-4" data-translate-key="match">Match Outfit</h1>
       <form
         class="flex items-center"
-        hx-post="http://localhost:7071/api/search"
+        hx-post="http://localhost:7071/api/match"
         hx-trigger="submit"
         hx-target="#search-results"
+        hx-encoding="multipart/form-data"
         hx-swap="innerHTML"
       >
-        <input
-          type="text"
-          name="query"
-          class="w-3/5 p-4 border border-gray-300 rounded-l h-12"
-          placeholder="Search for products..."
-        />
+        <input class="block w-full text-lg text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="image_upload" name="image_upload" type="file">
 
-        <button class="bg-chestnut-500 w-1/5 text-white px-4 py-2 rounded-r h-12" data-translate-key="search">
+        <button class="bg-chestnut-500 w-2/6 text-white px-4 py-2 rounded" data-translate-key="match">
           Search
         </button>
+
       </form>
 
       <h2 class="text-2xl font-bold mt-8 mb-4" data-translate-key="searchResults">Search Results</h2>
