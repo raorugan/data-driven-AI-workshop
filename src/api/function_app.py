@@ -1,10 +1,9 @@
-from typing import Optional
 import azure.functions as func
 import logging
 import json
 
 from azure.identity import AzureCliCredential, get_bearer_token_provider
-from openai import NOT_GIVEN, AzureOpenAI, NotGiven
+from openai import AzureOpenAI
 import os
 
 client: AzureOpenAI
@@ -99,11 +98,10 @@ def prep_search(query: str) -> str:
     ### End of implementation
     return search_query
 
-def fetch_embedding(input: str, dimensions: int | NotGiven = NOT_GIVEN, model: Optional[str] = embeddings_deployment) -> list[float]:
+def fetch_embedding(input: str) -> list[float]:
     embedding = client.embeddings.create(
         input=input,
-        model=model,
-        dimensions=dimensions
+        model=embeddings_deployment,
     )
     return embedding.data[0].embedding
 
@@ -119,23 +117,8 @@ def search(req: func.HttpRequest) -> func.HttpResponse:
         )
 
     fts_query = prep_search(query)
-
-    embedding_model = req.form.get('embedding-model', 'text-embedding-ada-002')
-    if embedding_model == 'text-embedding-ada-002':
-        dimensions = NOT_GIVEN
-        embedding_field = 'embedding'
-    elif embedding_model == 'text-embedding-3-large':
-        dimensions = 1024
-        embedding_field = 'embedding_large'
-    else:
-        raise ValueError("Invalid embedding model")
-
-    if req.form.get('similarity-mode', 'similarity-processed') == 'similarity-processed':
-        embedding = fetch_embedding(fts_query, model=embedding_model, dimensions=dimensions)
-    else:
-        embedding = fetch_embedding(query, model=embedding_model, dimensions=dimensions)
-
-    sql_results = search_products(query, fts_query, embedding, embedding_field)
+    embedding = fetch_embedding(query)
+    sql_results = search_products(query, fts_query, embedding)
 
     return func.HttpResponse(json.dumps({
         "keywords": fts_query,
@@ -159,19 +142,3 @@ def seed_embeddings(req: func.HttpRequest) -> func.HttpResponse:
             json.dump(data, f)
                 
         return func.HttpResponse("Successfully seeded embeddings")
-
-@app.route(methods=["get"], auth_level="anonymous",
-           route="seed_embeddings_large")
-def seed_large_embeddings(req: func.HttpRequest) -> func.HttpResponse:
-    # Seed the embeddings for the products in the database by calling the OpenAI API
-    with open('data/test.json') as f:
-        data = json.load(f)
-        for product in data:
-            if 'embedding_large' not in product or product['embedding_large'] is None:
-                product['embedding_large'] = fetch_embedding(product['name'] + ' ' + product['description'], dimensions=1024, model="text-embedding-3-large")
-
-        # Write the embeddings back to the test data
-        with open('data/test.json', 'w') as f:
-            json.dump(data, f)
-                
-        return func.HttpResponse("Successfully seeded large embeddings")
