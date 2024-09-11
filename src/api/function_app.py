@@ -135,6 +135,7 @@ def match(req: func.HttpRequest) -> func.HttpResponse:
     Matches the image upload with the product in the database with the closest embedding.
     """
     image = req.files.get('image_upload')
+    max_items = req.form.get('max_items', 2)
     if not image:
         return func.HttpResponse(
             "{'error': 'Please pass an image in the request body'}",
@@ -175,7 +176,7 @@ def match(req: func.HttpRequest) -> func.HttpResponse:
     text_embedding = fetch_embedding(image_description)
 
     # Do a product search with the text embedding
-    sql_results = search_products(image_description, image_description, text_embedding)
+    sql_results = search_products(image_description, image_description, text_embedding)[:max_items]
 
     return func.HttpResponse(json.dumps({
         "keywords": image_description,
