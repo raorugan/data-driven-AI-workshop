@@ -1,52 +1,62 @@
 {
-    "en": {
-      "home": "Home",
-      "search": "Search",
-      "welcome": "Welcome to Wide World Importers",
-      "description": "Wide World Importers is your go-to source for the finest imported goods from around the globe. We pride ourselves on offering a diverse selection of products that cater to all tastes and preferences. Whether you're looking for unique home decor, gourmet foods, or the latest in fashion, Wide World Importers has something for everyone. Explore our extensive catalog and discover the world of possibilities.",
-      "product1": "Burgundy Top",
-      "product2": "Teal Dress",
-      "addToCart": "Add to Cart",
-      "searchResults": "Search Results"
-    },
-    "es": {
-      "home": "Inicio",
-      "search": "Buscar",
-      "welcome": "Bienvenido a Wide World Importers",
-      "description": "Wide World Importers es su fuente de referencia para los mejores productos importados de todo el mundo. Nos enorgullecemos de ofrecer una selección diversa de productos que se adaptan a todos los gustos y preferencias. Ya sea que esté buscando decoración única para el hogar, alimentos gourmet o lo último en moda, Wide World Importers tiene algo para todos. Explore nuestro extenso catálogo y descubra un mundo de posibilidades.",
-      "product1": "Top Burdeos",
-      "product2": "Vestido Teal",
-      "addToCart": "Añadir al carrito",
-      "searchResults": "Resultados de la búsqueda"
-    },
-    "fr": {
-      "home": "Accueil",
-      "search": "Rechercher",
-      "welcome": "Bienvenue chez Wide World Importers",
-      "description": "Wide World Importers est votre source de référence pour les meilleurs produits importés du monde entier. Nous sommes fiers d'offrir une sélection diversifiée de produits qui répondent à tous les goûts et préférences. Que vous recherchiez une décoration unique pour la maison, des aliments gastronomiques ou les dernières tendances de la mode, Wide World Importers a quelque chose pour tout le monde. Explorez notre vaste catalogue et découvrez un monde de possibilités.",
-      "product1": "Top Bourgogne",
-      "product2": "Robe Teal",
-      "addToCart": "Ajouter au panier",
-      "searchResults": "Résultats de la recherche"
-    },
-    "de": {
-      "home": "Startseite",
-      "search": "Suchen",
-      "welcome": "Willkommen bei Wide World Importers",
-      "description": "Wide World Importers ist Ihre Anlaufstelle für die besten importierten Waren aus der ganzen Welt. Wir sind stolz darauf, eine vielfältige Auswahl an Produkten anzubieten, die alle Geschmäcker und Vorlieben ansprechen. Egal, ob Sie nach einzigartiger Wohnkultur, Gourmet-Lebensmitteln oder den neuesten Modetrends suchen, Wide World Importers hat für jeden etwas. Entdecken Sie unseren umfangreichen Katalog und entdecken Sie eine Welt voller Möglichkeiten.",
-      "product1": "Burgunder Top",
-      "product2": "Teal Kleid",
-      "addToCart": "In den Warenkorb",
-      "searchResults": "Suchergebnisse"
-    },
-    "ja": {
-      "home": "ホーム",
-      "search": "検索",
-      "welcome": "ワイドワールドインポーターズへようこそ",
-      "description": "ワイドワールドインポーターズは、世界中からの最高の輸入品を提供するための情報源です。私たちは、すべての好みや選好に対応する多様な製品を提供することを誇りに思っています。ユニークなホームデコレーション、グルメフード、最新のファッションをお探しの方にも、ワイドワールドインポーターズには何かがあります。豊富なカタログをご覧いただき、可能性の世界を発見してください。",
-      "product1": "バーガンディトップ",
-      "product2": "ティールドレス",
-      "addToCart": "カートに追加",
-      "searchResults": "検索結果"
-    }
+  "en": {
+    "home": "Home",
+    "search": "Search",
+    "welcome": "Welcome to Wide World Importers",
+    "description": "Wide World Importers is your go-to source for the finest imported goods from around the globe. We pride ourselves on offering a diverse selection of products that cater to all tastes and preferences. Whether you're looking for unique home decor, gourmet foods, or the latest in fashion, Wide World Importers has something for everyone. Explore our extensive catalog and discover the world of possibilities.",
+    "product1": "Burgundy Top",
+    "product2": "Teal Dress",
+    "addToCart": "Add to Cart",
+    "searchResults": "Search Results"
+  },
+  "es": {
+    "home": "Inicio",
+    "search": "Buscar",
+    "welcome": "Bienvenido a Wide World Importers",
+    "description": "Wide World Importers es su fuente de referencia para los mejores productos importados de todo el mundo. Nos enorgullecemos de ofrecer una selección diversa de productos que se adaptan a todos los gustos y preferencias. Ya sea que esté buscando decoración única para el hogar, alimentos gourmet o lo último en moda, Wide World Importers tiene algo para todos. Explore nuestro extenso catálogo y descubra un mundo de posibilidades.",
+    "product1": "Top Burdeos",
+    "product2": "Vestido Teal",
+    "addToCart": "Añadir al carrito",
+    "searchResults": "Resultados de la búsqueda"
+  },
+  "fr": {
+    "home": "Accueil",
+    "search": "Rechercher",
+    "welcome": "Bienvenue chez Wide World Importers",
+    "description": "Wide World Importers est votre source de référence pour les meilleurs produits importés du monde entier. Nous sommes fiers d'offrir une sélection diversifiée de produits qui répondent à tous les goûts et préférences. Que vous recherchiez une décoration unique pour la maison, des aliments gastronomiques ou les dernières tendances de la mode, Wide World Importers a quelque chose pour tout le monde. Explorez notre vaste catalogue et découvrez un monde de possibilités.",
+    "product1": "Top Bourgogne",
+    "product2": "Robe Teal",
+    "addToCart": "Ajouter au panier",
+    "searchResults": "Résultats de la recherche"
+  },
+  "de": {
+    "home": "Startseite",
+    "search": "Suchen",
+    "welcome": "Willkommen bei Wide World Importers",
+    "description": "Wide World Importers ist Ihre Anlaufstelle für die besten importierten Waren aus der ganzen Welt. Wir sind stolz darauf, eine vielfältige Auswahl an Produkten anzubieten, die alle Geschmäcker und Vorlieben ansprechen. Egal, ob Sie nach einzigartiger Wohnkultur, Gourmet-Lebensmitteln oder den neuesten Modetrends suchen, Wide World Importers hat für jeden etwas. Entdecken Sie unseren umfangreichen Katalog und entdecken Sie eine Welt voller Möglichkeiten.",
+    "product1": "Burgunder Top",
+    "product2": "Teal Kleid",
+    "addToCart": "In den Warenkorb",
+    "searchResults": "Suchergebnisse"
+  },
+  "ja": {
+    "home": "ホーム",
+    "search": "検索",
+    "welcome": "ワイドワールドインポーターズへようこそ",
+    "description": "ワイドワールドインポーターズは、世界中からの最高の輸入品を提供するための情報源です。私たちは、すべての好みや選好に対応する多様な製品を提供することを誇りに思っています。ユニークなホームデコレーション、グルメフード、最新のファッションをお探しの方にも、ワイドワールドインポーターズには何かがあります。豊富なカタログをご覧いただき、可能性の世界を発見してください。",
+    "product1": "バーガンディトップ",
+    "product2": "ティールドレス",
+    "addToCart": "カートに追加",
+    "searchResults": "検索結果"
+  },
+  "hi": {
+    "home": "होम",
+    "search": "खोज",
+    "welcome": "वाइड वर्ल्ड इम्पोर्टर्स में आपका स्वागत है",
+    "description": "वाइड वर्ल्ड इम्पोर्टर्स आपके लिए दुनिया भर से आयात की गई विश्वसनीय वस्तुओं का सर्वोत्तम स्रोत है। हमें गर्व है कि हम उन सभी रुचियों और पसंदों को पूरा करने वाले उत्पादों का विविध चयन प्रदान करते हैं। चाहे आप अद्वितीय घर की सजावट, गोरमेट खाद्य या नवीनतम फैशन की तलाश में हों, वाइड वर्ल्ड इम्पोर्टर्स में सभी के लिए कुछ न कुछ है। हमारी विस्तृत सूची का अन्वेषण करें और संभावनाओं की दुनिया का खोज करें।",
+    "product1": "बरगंडी टॉप",
+    "product2": "टील ड्रेस",
+    "addToCart": "कार्ट में जोड़ें",
+    "searchResults": "खोज के परिणाम"
   }
+}

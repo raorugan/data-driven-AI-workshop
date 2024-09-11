@@ -12,10 +12,10 @@ import sqlite3
 import json
 import logging
 import numpy as np
-from .models import Product
+from .models import ProductWithSimilarity
 
 HAS_FTS5 = False
-SIMILARITY_THRESHOLD = 0.77
+SIMILARITY_THRESHOLD = 0.2
 
 
 def cosine_similarity(a: list[float], b: list[float]) -> float:
@@ -57,6 +57,7 @@ def connect(database = 'dev.db') -> "sqlite3.Connection":
                         image text,
                         price real,
                         embedding text);""")
+        logging.info("Created products table")
         
         if HAS_FTS5:
             # Create a FTS5 virtual table for full-text search
@@ -73,17 +74,17 @@ def connect(database = 'dev.db') -> "sqlite3.Connection":
                           product['image'], 
                           product['price'], 
                           # Convert the embedding into a string of CSV values, this is hugely inefficient but we have 9 products
-                          ','.join([str(f) for f in product['embedding']])
+                          ','.join([str(f) for f in product.get('embedding', [])]),
                           ))
         logging.info("Loaded test data into database")
 
     return conn
 
-def search_products(query: str, fts_query: str, embedding: list[float]) -> list[Product]:
+def search_products(query: str, fts_query: str, embedding: list[float]) -> list[ProductWithSimilarity]:
     cursor = connect(':memory:').cursor()
     
     # Do a vector search. This is sqlite and we don't have a vector index, so do a similarity on ALL of them
-    cursor.execute("SELECT id, name, description, price, image, embedding FROM products");
+    cursor.execute(f"SELECT id, name, description, price, image, embedding FROM products");
     results = cursor.fetchall()
     distances: tuple[float, tuple[int, str, str, str]] = []
     for result in results:
@@ -100,7 +101,6 @@ def search_products(query: str, fts_query: str, embedding: list[float]) -> list[
     logging.info(f"Found {len(distances)} results with similarity > {SIMILARITY_THRESHOLD}")
 
     # Search the productFtsIndex table for the query
-    cursor = sqlite3.connect('dev.db').cursor()
     if HAS_FTS5:
         cursor.execute("SELECT id, name, description, price, image FROM productFtsIndex WHERE productFtsIndex MATCH ?", (fts_query,))
     else:
@@ -112,12 +112,12 @@ def search_products(query: str, fts_query: str, embedding: list[float]) -> list[
     results = []
     found_ids = []
     for product in fts_results:
-        results.append(Product(id=product[0], name=product[1], description=product[2], price=product[3], image=product[4], embedding=None))
+        results.append(ProductWithSimilarity(id=product[0], name=product[1], description=product[2], price=product[3], image=product[4], embedding=None, similarity=1))
         found_ids.append(product[0])
 
-    for _, product in distances:
+    for similarity, product in distances:
         if product[0] not in found_ids:
-            results.append(Product(id=product[0], name=product[1], description=product[2], price=product[3], image=product[4], embedding=None))
+            results.append(ProductWithSimilarity(id=product[0], name=product[1], description=product[2], price=product[3], image=product[4], embedding=None, similarity=similarity))
 
     return results
     

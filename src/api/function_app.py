@@ -2,7 +2,6 @@ import azure.functions as func
 import logging
 import json
 
-
 from azure.identity import AzureCliCredential, get_bearer_token_provider
 from openai import AzureOpenAI
 import os
@@ -10,11 +9,11 @@ import os
 client: AzureOpenAI
 DEVELOPMENT = os.getenv("DEVELOPMENT", True)
 
-if not DEVELOPMENT:
+if os.getenv("AZURE_OPENAI_ENDPOINT") and os.getenv("AZURE_OPENAI_KEY"):
     client = AzureOpenAI(
         api_version="2024-02-15-preview",
         azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-        api_key=os.getenv("AZURE_OPENAI_APIKEY")
+        api_key=os.getenv("AZURE_OPENAI_KEY")
     )
 else:
     azure_credential = AzureCliCredential(tenant_id=os.getenv("AZURE_TENANT_ID"))
@@ -25,7 +24,9 @@ else:
         azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
         azure_ad_token_provider=token_provider
     )
+
 completions_deployment = os.getenv("CHAT_DEPLOYMENT_NAME", "gpt-35-turbo")
+embeddings_deployment = os.getenv("EMBEDDINGS_DEPLOYMENT_NAME", "text-embedding-ada-002")
 
 if DEVELOPMENT:
     from backends.local import search_products
@@ -63,13 +64,25 @@ def prep_search(query: str) -> str:
             "role": "system",
             "content": 
             """  
-                Generate a full-text search query for a SQL database based on a user question. 
+                Generate a full-text search query for a SQL database based on a user query. 
                 Do not generate the whole SQL query; only generate string to go inside the MATCH parameter for FTS5 indexes. 
                 Use SQL boolean operators if the user has been specific about what they want to exclude in the search.
-                If the question is not in English, translate the question to English before generating the search query.
+                If the query is not in English, always translate the query to English.
                 If you cannot generate a search query, return just the number 0.
             """
-        }, 
+        },
+        {   "role": "user",
+            "content": f"Generate a search query for: A really nice winter jacket"
+        },
+        {  "role": "assistant",
+            "content": "winter jacket"
+        },
+        {   "role": "user",
+            "content": "Generate a search query for: 夏のドレス"
+        },
+        {   "role": "assistant",
+            "content": "summer dress"
+        },
         {
             "role": "user",
             "content": f"Generate a search query for: {query}"
@@ -77,8 +90,9 @@ def prep_search(query: str) -> str:
         max_tokens=100, # maximum number of tokens to generate
         n=1, # return only one completion
         stop=None, # stop at the end of the completion
-        top_p=0.95,
-        stream=False # return the completion as a single string
+        temperature=0.3, # more predictable
+        stream=False, # return the completion as a single string
+        seed=1, # seed for reproducibility
     )
     search_query = completion.choices[0].message.content
     ### End of implementation
@@ -87,7 +101,7 @@ def prep_search(query: str) -> str:
 def fetch_embedding(input: str) -> list[float]:
     embedding = client.embeddings.create(
         input=input,
-        model="embedding", # "text-embedding-ada-002"
+        model=embeddings_deployment,
     )
     return embedding.data[0].embedding
 
@@ -102,13 +116,9 @@ def search(req: func.HttpRequest) -> func.HttpResponse:
             status_code=400
         )
 
-    if not client: # If not using OpenAI for now, just use the query as is
-        fts_query = query
-        logging.info(f"Using query as is: {fts_query}")
-    else:
-        fts_query = prep_search(query)
-
-    sql_results = search_products(query, fts_query, fetch_embedding(query))
+    fts_query = prep_search(query)
+    embedding = fetch_embedding(query)
+    sql_results = search_products(query, fts_query, embedding)
 
     return func.HttpResponse(json.dumps({
         "keywords": fts_query,
@@ -124,7 +134,7 @@ def seed_embeddings(req: func.HttpRequest) -> func.HttpResponse:
     with open('data/test.json') as f:
         data = json.load(f)
         for product in data:
-            if product['embedding'] is None:
+            if 'embedding' not in product or product['embedding'] is None:
                 product['embedding'] = fetch_embedding(product['name'] + ' ' + product['description'])
 
         # Write the embeddings back to the test data

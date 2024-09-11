@@ -8,3 +8,7 @@ class Product(BaseModel):
     image: str
     price: float
     embedding: list[float] | None
+
+
+class ProductWithSimilarity(Product):
+    similarity: float
