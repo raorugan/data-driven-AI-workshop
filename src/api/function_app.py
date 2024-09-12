@@ -26,8 +26,8 @@ else:
         azure_ad_token_provider=token_provider
     )
 
-completions_deployment = os.getenv("CHAT_DEPLOYMENT_NAME", "gpt-35-turbo")
-embeddings_deployment = os.getenv("EMBEDDINGS_DEPLOYMENT_NAME", "text-embedding-ada-002")
+completions_deployment = os.getenv("CHAT_DEPLOYMENT_NAME", "gpt-4o")
+embeddings_deployment = os.getenv("EMBEDDINGS_DEPLOYMENT_NAME", "text-embedding-3-large")
 
 if DEVELOPMENT:
     from backends.local import search_products
@@ -103,6 +103,7 @@ def fetch_embedding(input: str) -> list[float]:
     embedding = client.embeddings.create(
         input=input,
         model=embeddings_deployment,
+        dimensions=1024,  # this is only supported in the text-embedding-3 models
     )
     return embedding.data[0].embedding
 
