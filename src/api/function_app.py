@@ -1,9 +1,11 @@
+from urllib.parse import urljoin
 import azure.functions as func
 import logging
 import json
 
 from azure.identity import AzureCliCredential, get_bearer_token_provider
 from openai import AzureOpenAI
+import httpx
 import os
 from base64 import b64encode
 
@@ -27,7 +29,8 @@ else:
     )
 
 completions_deployment = os.getenv("CHAT_DEPLOYMENT_NAME", "gpt-4o")
-embeddings_deployment = os.getenv("EMBEDDINGS_DEPLOYMENT_NAME", "text-embedding-3-large")
+embeddings_deployment = os.getenv("EMBEDDINGS_DEPLOYMENT_NAME", "text-embedding-3-small")
+vision_endpoint = os.getenv("VISION_ENDPOINT")
 
 if DEVELOPMENT:
     from backends.local import search_products
@@ -106,6 +109,23 @@ def fetch_embedding(input: str) -> list[float]:
         dimensions=1024,  # this is only supported in the text-embedding-3 models
     )
     return embedding.data[0].embedding
+
+
+def fetch_computer_vision_image_embedding(data: str) -> list[float]:
+    endpoint = urljoin(vision_endpoint, "computervision/retrieval:vectorizeText")
+    headers = {"Content-Type": "application/json"}
+    params = {"api-version": "2023-02-01-preview", "modelVersion": "latest"}
+    data = {"text": data}
+
+    headers["Authorization"] = "Bearer " + token_provider()
+
+    response = httpx.post(
+            url=endpoint, params=params, headers=headers, json=data, raise_for_status=True
+        ) 
+    json = response.json()
+    image_query_vector = json["vector"]
+    return image_query_vector
+
 
 @app.route(methods=["post"], auth_level="anonymous",
                     route="search")
@@ -188,11 +208,16 @@ def match(req: func.HttpRequest) -> func.HttpResponse:
 @app.route(methods=["get"], auth_level="anonymous",
            route="seed_embeddings")
 def seed_embeddings(req: func.HttpRequest) -> func.HttpResponse:
+    diff = req.params.get('diff', False)
     # Seed the embeddings for the products in the database by calling the OpenAI API
     with open('data/test.json') as f:
         data = json.load(f)
         for product in data:
-            if 'embedding' not in product or product['embedding'] is None:
+            if diff and ('embedding' not in product or product['embedding'] is None):
+                update = True
+            if not diff:
+                update = True
+            if update:
                 product['embedding'] = fetch_embedding(product['name'] + ' ' + product['description'])
 
         # Write the embeddings back to the test data
