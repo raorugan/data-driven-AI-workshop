@@ -125,7 +125,14 @@ def search_products(query: str, fts_query: str, embedding: list[float]) -> list[
     logging.info(f"Found {len(fts_results)} results from FTS5")
 
     # Combine the results from the FTS5 search and the vector search
+    # We use a dict to get keep the results unique and ordered
     results = [ProductWithSimilarity(id=product[0], name=product[1], description=product[2], price=product[3], image=product[4], embedding=None, similarity=1) for product in fts_results]
 
-    return list(set(results + vector_results))
+    found_ids = [product.id for product in results]
+
+    for product in vector_results:
+        if product.id not in found_ids:
+            results.append(product)
+
+    return list(results)
     

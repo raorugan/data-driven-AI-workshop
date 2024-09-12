@@ -212,7 +212,9 @@ def match(req: func.HttpRequest) -> func.HttpResponse:
     image_description = description.choices[0].message.content
     text_embedding = fetch_embedding(image_description)
 
-    if USE_COMPUTER_VISION:
+    embedding_source = req.form.get('embedding_source', 'text')
+
+    if USE_COMPUTER_VISION and embedding_source == 'image':
         image_embedding = fetch_computer_vision_image_embedding(image_contents, image_type)
         sql_results = search_images(image_embedding)[:max_items]
     else:

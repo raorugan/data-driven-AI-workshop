@@ -132,10 +132,15 @@ def search_products(
         ))
 
     # 2. Search for products using the vector search
-    results = results + vector_search(container, embedding, "productDescriptionVector")
+    vector_results = vector_search(container, embedding, "productDescriptionVector")
 
-    # 3. Combine the results
-    return list(set(results))
+    found_ids = [product.id for product in results]
+
+    for product in vector_results:
+        if product.id not in found_ids:
+            results.append(product)
+    
+    return results
 
 
 def seed_test_data():
@@ -146,7 +151,7 @@ def seed_test_data():
     with open("data/test.json") as f:
         data = json.load(f)
         for product in data:
-            container.create_item(body={
+            container.upsert_item(body={
                 "id": f"{id_affix}{ product['id'] }", 
                 "name": product["name"],
                 "description": product["description"],

@@ -63,12 +63,19 @@
         hx-target="#search-results"
         hx-encoding="multipart/form-data"
         hx-swap="innerHTML"
+        hx-indicator="#loading"
       >
         <input class="block w-full text-lg text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="image_upload" name="image_upload" type="file">
 
         <button class="bg-chestnut-500 w-2/6 text-white px-4 py-2 rounded" data-translate-key="match">
           Search
         </button>
+
+        <!-- A drop down to choose whether to use Computer Vision embedding models or text description models -->
+        <select id="embedding_source" name="embedding_source" class="w-2/6 p-2 border border-gray-300 rounded-l h-12">
+          <option value="image" selected>Image Embedding (Computer Vision)</option>
+          <option value="text">Text Description (GPT-4o)</option>
+        </select>
 
       </form>
 
