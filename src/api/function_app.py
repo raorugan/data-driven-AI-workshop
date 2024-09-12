@@ -11,7 +11,7 @@ import pathlib
 from base64 import b64encode
 
 client: AzureOpenAI
-DEVELOPMENT = os.getenv("DEVELOPMENT", True)
+DEVELOPMENT = bool(int(os.getenv("DEVELOPMENT", 1)))
 
 # Set to False if you don't have access to the Azure Computer Vision API
 USE_COMPUTER_VISION = True
@@ -228,6 +228,10 @@ def match(req: func.HttpRequest) -> func.HttpResponse:
 @app.route(methods=["get"], auth_level="anonymous",
            route="seed_embeddings")
 def seed_embeddings(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    If you add a new product to the data/test.json file this will fetch the embeddings and the image embedding 
+    then add it to the JSON file.
+    """
     diff = req.params.get('diff', False)
     # Seed the embeddings for the products in the database by calling the OpenAI API
     with open('data/test.json') as f:
@@ -247,3 +251,15 @@ def seed_embeddings(req: func.HttpRequest) -> func.HttpResponse:
             json.dump(data, f)
                 
         return func.HttpResponse("Successfully seeded embeddings")
+
+
+@app.route(methods=["get"], auth_level="anonymous",
+              route="seed_test_data")
+def seed_test_data(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Put some test data into the Azure Cosmos database
+    """
+    from backends.azure_cosmos import seed_test_data
+
+    seed_test_data()
+    return func.HttpResponse("Successfully seeded test data")

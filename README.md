@@ -67,6 +67,12 @@ If the question is not in English, translate the question to English before gene
 If you cannot generate a search query, return just the number 0.
 ```
 
+## Adding Cosmos DB support
+
+See [Enroll in the Vector Search Preview Feature](https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/vector-search#enroll-in-the-vector-search-preview-feature) for details on how to enable the Vector Search feature in Cosmos DB.
+
+
+
 ## Uploading images
 
 ### Azurite Storage Emulator
