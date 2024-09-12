@@ -16,6 +16,9 @@ cosmos_key = os.getenv("AZURE_COSMOS_KEY", None)
 DEFAULT_DATABASE_NAME = "products"
 DEFAULT_CONTAINER_NAME = "products"
 
+DESCRIPTION_EMBEDDING_FIELD = "productDescriptionVector"
+IMAGE_EMBEDDING_FIELD = "productImageVector"
+
 client: CosmosClient
 
 if not cosmos_key:
@@ -29,13 +32,13 @@ else:
 vector_embedding_policy = { 
     "vectorEmbeddings": [ 
         { 
-            "path": "/productImageVector", 
+            "path": f"/{IMAGE_EMBEDDING_FIELD}", 
             "dataType": "float32", 
             "distanceFunction": "cosine", 
             "dimensions": 1024
         }, 
         { 
-            "path": "/productDescriptionVector", 
+            "path": f"/{DESCRIPTION_EMBEDDING_FIELD}", 
             "dataType": "float32", 
             "distanceFunction": "cosine", 
             "dimensions": 1024
@@ -48,13 +51,13 @@ indexing_policy = {
     "excludedPaths": [
         {
             "path": '/"_etag"/?',
-            "path": "/productImageVector/*",
-            "path": "/productDescriptionVector/*",
+            "path": f"/{IMAGE_EMBEDDING_FIELD}/*",
+            "path": f"/{DESCRIPTION_EMBEDDING_FIELD}/*",
         }
     ],
     "vectorIndexes": [
-        {"path": "/productImageVector", "type": "quantizedFlat"},
-        {"path": "/productDescriptionVector", "type": "quantizedFlat"},
+        {"path": "/{IMAGE_EMBEDDING_FIELD}", "type": "quantizedFlat"},
+        {"path": f"/{DESCRIPTION_EMBEDDING_FIELD}", "type": "quantizedFlat"},
     ],
 }
 
@@ -103,7 +106,7 @@ def search_images(embedding: list[float]) -> list[ProductWithSimilarity]:
     if not container:
         return []
     
-    return vector_search(container, embedding, "productImageVector")
+    return vector_search(container, embedding, IMAGE_EMBEDDING_FIELD)
 
 
 def search_products(
@@ -132,7 +135,7 @@ def search_products(
         ))
 
     # 2. Search for products using the vector search
-    vector_results = vector_search(container, embedding, "productDescriptionVector")
+    vector_results = vector_search(container, embedding, DESCRIPTION_EMBEDDING_FIELD)
 
     found_ids = [product.id for product in results]
 
@@ -157,19 +160,15 @@ def seed_test_data():
                 "description": product["description"],
                 "image": product["image"],
                 "price": product["price"],
-                "productImageVector": product.get("image_embedding", []),
-                "productDescriptionVector": product.get("embedding", []),
+                IMAGE_EMBEDDING_FIELD: product.get("image_embedding", []),
+                DESCRIPTION_EMBEDDING_FIELD: product.get("embedding", []),
             })
     logging.info("Loaded test data into database")
 
 
-def update_product_embedding(product_id: int, embedding: list[float]):
+def update_product(doc):
     container = get_container()
     if not container:
         return
-
-    container.upsert_item(body={
-        "id": f"{id_affix}{product_id}",
-        "productDescriptionVector": embedding
-    })
-    logging.info(f"Updated embedding for product {product_id}")
+    container.upsert_item(body=doc)
+    logging.info(f"Updated embedding for product {doc['id']}")

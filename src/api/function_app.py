@@ -43,23 +43,14 @@ if DEVELOPMENT:
 
     USE_COSMOSDB = False
 else:
-    from backends.azure_cosmos import search_products, search_images, DEFAULT_DATABASE_NAME, DEFAULT_CONTAINER_NAME, update_product_embedding
+    from backends.azure_cosmos import search_products, search_images, \
+                                      DEFAULT_DATABASE_NAME, DEFAULT_CONTAINER_NAME, \
+                                      update_product, \
+                                      DESCRIPTION_EMBEDDING_FIELD, IMAGE_EMBEDDING_FIELD
 
     USE_COSMOSDB = True
 
 app = func.FunctionApp()
-
-@app.blob_trigger(arg_name="imageblob", path="uploads",
-                  connection="ImagesConnection") 
-def image_trigger(imageblob: func.InputStream):
-    logging.info(f"Python blob trigger function processing blob"
-                f"Name: {imageblob.name}"
-                f"Blob Size: {imageblob.length} bytes")
-    # 1. Create an embedding from the file
-
-    # 2. Save the embedding to the database
-
-    # 3. Return the URL of the image and the embedding
 
 
 def prep_search(query: str) -> str:
@@ -242,13 +233,24 @@ if USE_COSMOSDB:
         if documents:
             logging.info('Document id: %s', documents[0]['id'])
         
-        # If the productDescriptionVector field is empty, then update it with the embedding
-        # from the product description
         for doc in documents:
-            if not doc.get('productDescriptionVector'):
-                update_product_embedding(doc['id'], fetch_embedding(doc['name'] + " " + doc['description']))
+            has_changes = False
+            # Determine if the name or description has changed
+            embedding = fetch_embedding(doc['name'] + " " + doc['description'])
+            if doc.get(DESCRIPTION_EMBEDDING_FIELD) != embedding:
+                has_changes = True
+                doc[DESCRIPTION_EMBEDDING_FIELD] = embedding
+                logging.info(f"Updated embedding for {doc['name']}")
 
-                logging.info(f"Updated embedding for document {doc['id']}")
+            if USE_COMPUTER_VISION:
+                image_embedding = fetch_computer_vision_image_embedding(pathlib.Path("../html/images/products/") / doc['image'], "image/jpeg")
+                if doc.get(IMAGE_EMBEDDING_FIELD) != image_embedding:
+                    has_changes = True
+                    doc[IMAGE_EMBEDDING_FIELD] = image_embedding
+                    logging.info(f"Updated image embedding for {doc['name']}")
+
+            if has_changes:
+                update_product(doc)
 
 
 @app.route(methods=["get"], auth_level="anonymous",
