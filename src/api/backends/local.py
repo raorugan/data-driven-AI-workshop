@@ -11,6 +11,7 @@ This means the search is very slow and O(N^N), but it's good enough for developm
 import sqlite3 
 import json
 import logging
+from typing import Optional
 import numpy as np
 from .models import ProductWithSimilarity
 
@@ -80,11 +81,10 @@ def connect(database = 'dev.db') -> "sqlite3.Connection":
 
     return conn
 
-def search_products(query: str, fts_query: str, embedding: list[float]) -> list[ProductWithSimilarity]:
-    cursor = connect(':memory:').cursor()
-    
+
+def vector_search_products(cursor, embedding: list[float], embedding_field: Optional[str] = "embedding") -> list[ProductWithSimilarity]:
     # Do a vector search. This is sqlite and we don't have a vector index, so do a similarity on ALL of them
-    cursor.execute(f"SELECT id, name, description, price, image, embedding FROM products");
+    cursor.execute(f"SELECT id, name, description, price, image, {embedding_field} FROM products");
     results = cursor.fetchall()
     distances: tuple[float, tuple[int, str, str, str]] = []
     for result in results:
@@ -100,6 +100,19 @@ def search_products(query: str, fts_query: str, embedding: list[float]) -> list[
 
     logging.info(f"Found {len(distances)} results with similarity > {SIMILARITY_THRESHOLD}")
 
+    return [ProductWithSimilarity(id=product[0], name=product[1], description=product[2], price=product[3], image=product[4], embedding=None, similarity=similarity) for similarity, product in distances]
+
+
+def search_images(embedding: list[float]):
+    cursor = connect(':memory:').cursor()
+    return vector_search_products(cursor, embedding, 'image_embedding')
+
+
+def search_products(query: str, fts_query: str, embedding: list[float]) -> list[ProductWithSimilarity]:
+    cursor = connect(':memory:').cursor()
+
+    vector_results = vector_search_products(cursor, embedding)
+
     # Search the productFtsIndex table for the query
     if HAS_FTS5:
         cursor.execute("SELECT id, name, description, price, image FROM productFtsIndex WHERE productFtsIndex MATCH ?", (fts_query,))
@@ -109,15 +122,7 @@ def search_products(query: str, fts_query: str, embedding: list[float]) -> list[
     logging.info(f"Found {len(fts_results)} results from FTS5")
 
     # Combine the results from the FTS5 search and the vector search
-    results = []
-    found_ids = []
-    for product in fts_results:
-        results.append(ProductWithSimilarity(id=product[0], name=product[1], description=product[2], price=product[3], image=product[4], embedding=None, similarity=1))
-        found_ids.append(product[0])
+    results = [ProductWithSimilarity(id=product[0], name=product[1], description=product[2], price=product[3], image=product[4], embedding=None, similarity=1) for product in fts_results]
 
-    for similarity, product in distances:
-        if product[0] not in found_ids:
-            results.append(ProductWithSimilarity(id=product[0], name=product[1], description=product[2], price=product[3], image=product[4], embedding=None, similarity=similarity))
-
-    return results
+    return list(set(results + vector_results))
     

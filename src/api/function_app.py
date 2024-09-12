@@ -7,10 +7,14 @@ from azure.identity import AzureCliCredential, get_bearer_token_provider
 from openai import AzureOpenAI
 import httpx
 import os
+import pathlib
 from base64 import b64encode
 
 client: AzureOpenAI
 DEVELOPMENT = os.getenv("DEVELOPMENT", True)
+
+# Set to False if you don't have access to the Azure Computer Vision API
+USE_COMPUTER_VISION = True
 
 if os.getenv("AZURE_OPENAI_ENDPOINT") and os.getenv("AZURE_OPENAI_KEY"):
     client = AzureOpenAI(
@@ -18,6 +22,7 @@ if os.getenv("AZURE_OPENAI_ENDPOINT") and os.getenv("AZURE_OPENAI_KEY"):
         azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
         api_key=os.getenv("AZURE_OPENAI_KEY")
     )
+    token_provider = None
 else:
     azure_credential = AzureCliCredential(tenant_id=os.getenv("AZURE_TENANT_ID"))
     token_provider = get_bearer_token_provider(azure_credential,
@@ -31,11 +36,12 @@ else:
 completions_deployment = os.getenv("CHAT_DEPLOYMENT_NAME", "gpt-4o")
 embeddings_deployment = os.getenv("EMBEDDINGS_DEPLOYMENT_NAME", "text-embedding-3-small")
 vision_endpoint = os.getenv("VISION_ENDPOINT")
+vision_api_key = os.getenv("VISION_API_KEY")
 
 if DEVELOPMENT:
-    from backends.local import search_products
+    from backends.local import search_products, search_images
 else:
-    from backends.azure_cosmos import search_products
+    from backends.azure_cosmos import search_products, search_images
 
 app = func.FunctionApp()
 
@@ -111,17 +117,27 @@ def fetch_embedding(input: str) -> list[float]:
     return embedding.data[0].embedding
 
 
-def fetch_computer_vision_image_embedding(data: str) -> list[float]:
-    endpoint = urljoin(vision_endpoint, "computervision/retrieval:vectorizeText")
-    headers = {"Content-Type": "application/json"}
-    params = {"api-version": "2023-02-01-preview", "modelVersion": "latest"}
-    data = {"text": data}
+def fetch_computer_vision_image_embedding(data: bytes | pathlib.Path, mimetype: str) -> list[float]:
+    if isinstance(data, pathlib.Path):
+        with open(data, "rb") as f:
+            data = f.read()
 
-    headers["Authorization"] = "Bearer " + token_provider()
+    endpoint = urljoin(vision_endpoint, "computervision/retrieval:vectorizeImage")
+    headers = {"Content-Type": mimetype}
+    params = {"api-version": "2024-02-01", "model-version": "2023-04-15"}
+
+    if token_provider:  # Managed Identity
+        headers["Authorization"] = f"Bearer " + token_provider()
+    else:
+        headers['Ocp-Apim-Subscription-Key'] = vision_api_key
 
     response = httpx.post(
-            url=endpoint, params=params, headers=headers, json=data, raise_for_status=True
-        ) 
+            url=endpoint, params=params, headers=headers, data=data 
+        )
+    if response.status_code != 200:
+        logging.error(f"Failed to fetch image embedding: {response.text}")
+
+    response.raise_for_status()
     json = response.json()
     image_query_vector = json["vector"]
     return image_query_vector
@@ -196,8 +212,12 @@ def match(req: func.HttpRequest) -> func.HttpResponse:
     image_description = description.choices[0].message.content
     text_embedding = fetch_embedding(image_description)
 
-    # Do a product search with the text embedding
-    sql_results = search_products(image_description, image_description, text_embedding)[:max_items]
+    if USE_COMPUTER_VISION:
+        image_embedding = fetch_computer_vision_image_embedding(image_contents, image_type)
+        sql_results = search_images(image_embedding)[:max_items]
+    else:
+        # Do a product search with the text embedding
+        sql_results = search_products(image_description, image_description, text_embedding)[:max_items]
 
     return func.HttpResponse(json.dumps({
         "keywords": image_description,
@@ -219,6 +239,8 @@ def seed_embeddings(req: func.HttpRequest) -> func.HttpResponse:
                 update = True
             if update:
                 product['embedding'] = fetch_embedding(product['name'] + ' ' + product['description'])
+                if USE_COMPUTER_VISION:
+                    product['image_embedding'] = fetch_computer_vision_image_embedding(pathlib.Path("../html/images/products/") / product['image'], "image/jpeg")
 
         # Write the embeddings back to the test data
         with open('data/test.json', 'w') as f:
