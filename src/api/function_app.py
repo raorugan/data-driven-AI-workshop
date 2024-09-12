@@ -210,7 +210,6 @@ def match(req: func.HttpRequest) -> func.HttpResponse:
         seed=1, # seed for reproducibility
     )
     image_description = description.choices[0].message.content
-    text_embedding = fetch_embedding(image_description)
 
     embedding_source = req.form.get('embedding_source', 'text')
 
@@ -219,6 +218,7 @@ def match(req: func.HttpRequest) -> func.HttpResponse:
         sql_results = search_images(image_embedding)[:max_items]
     else:
         # Do a product search with the text embedding
+        text_embedding = fetch_embedding(image_description)
         sql_results = search_products(image_description, image_description, text_embedding)[:max_items]
 
     return func.HttpResponse(json.dumps({
