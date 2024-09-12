@@ -57,7 +57,9 @@ def connect(database = 'dev.db') -> "sqlite3.Connection":
                         description text,
                         image text,
                         price real,
-                        embedding text);""")
+                        embedding text,
+                        image_embedding text
+                     );""")
         logging.info("Created products table")
         
         if HAS_FTS5:
@@ -69,13 +71,14 @@ def connect(database = 'dev.db') -> "sqlite3.Connection":
     with open('data/test.json') as f:
         data = json.load(f)
         for product in data:
-            conn.execute("INSERT INTO products (name, description, image, price, embedding) VALUES (?, ?, ?, ?, ?)", 
+            conn.execute("INSERT INTO products (name, description, image, price, embedding, image_embedding) VALUES (?, ?, ?, ?, ?, ?)", 
                          (product['name'], 
                           product['description'], 
                           product['image'], 
                           product['price'], 
                           # Convert the embedding into a string of CSV values, this is hugely inefficient but we have 9 products
                           ','.join([str(f) for f in product.get('embedding', [])]),
+                          ','.join([str(f) for f in product.get('image_embedding', [])]),
                           ))
         logging.info("Loaded test data into database")
 
