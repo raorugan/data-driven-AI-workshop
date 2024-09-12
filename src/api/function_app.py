@@ -40,8 +40,12 @@ vision_api_key = os.getenv("VISION_API_KEY")
 
 if DEVELOPMENT:
     from backends.local import search_products, search_images
+
+    USE_COSMOSDB = False
 else:
-    from backends.azure_cosmos import search_products, search_images
+    from backends.azure_cosmos import search_products, search_images, DEFAULT_DATABASE_NAME, DEFAULT_CONTAINER_NAME, update_product_embedding
+
+    USE_COSMOSDB = True
 
 app = func.FunctionApp()
 
@@ -225,6 +229,26 @@ def match(req: func.HttpRequest) -> func.HttpResponse:
         "keywords": image_description,
         "results": [product.model_dump() for product in sql_results],
         }))
+
+if USE_COSMOSDB:
+    @app.function_name(name="CosmosDBTrigger")
+    @app.cosmos_db_trigger(arg_name="documents", 
+                        connection="AZURE_COSMOS_CONNECTION_STRING", 
+                        database_name=DEFAULT_DATABASE_NAME, 
+                        container_name=DEFAULT_CONTAINER_NAME, 
+                        lease_container_name="leases",
+                        create_lease_container_if_not_exists="true")
+    def update_embedding_for_document(documents: func.DocumentList) -> str:
+        if documents:
+            logging.info('Document id: %s', documents[0]['id'])
+        
+        # If the productDescriptionVector field is empty, then update it with the embedding
+        # from the product description
+        for doc in documents:
+            if not doc.get('productDescriptionVector'):
+                update_product_embedding(doc['id'], fetch_embedding(doc['name'] + " " + doc['description']))
+
+                logging.info(f"Updated embedding for document {doc['id']}")
 
 
 @app.route(methods=["get"], auth_level="anonymous",

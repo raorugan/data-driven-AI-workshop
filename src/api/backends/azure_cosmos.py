@@ -161,3 +161,15 @@ def seed_test_data():
                 "productDescriptionVector": product.get("embedding", []),
             })
     logging.info("Loaded test data into database")
+
+
+def update_product_embedding(product_id: int, embedding: list[float]):
+    container = get_container()
+    if not container:
+        return
+
+    container.upsert_item(body={
+        "id": f"{id_affix}{product_id}",
+        "productDescriptionVector": embedding
+    })
+    logging.info(f"Updated embedding for product {product_id}")
