@@ -1,17 +1,16 @@
-from urllib.parse import urljoin
 import azure.functions as func
 import logging
 import json
 
 from azure.identity import AzureCliCredential, get_bearer_token_provider
 from openai import AzureOpenAI
-import httpx
 import os
 import pathlib
 from base64 import b64encode
+from embeddings import fetch_embedding, fetch_computer_vision_image_embedding
 
 client: AzureOpenAI
-DEVELOPMENT = bool(int(os.getenv("DEVELOPMENT", 1)))
+DEVELOPMENT = bool(int(os.getenv("DEVELOPMENT", 0)))
 
 # Set to False if you don't have access to the Azure Computer Vision API
 USE_COMPUTER_VISION = True
@@ -38,7 +37,7 @@ embeddings_deployment = os.getenv("EMBEDDINGS_DEPLOYMENT_NAME", "text-embedding-
 vision_endpoint = os.getenv("VISION_ENDPOINT")
 vision_api_key = os.getenv("VISION_API_KEY")
 
-if DEVELOPMENT:
+if not os.getenv("AZURE_COSMOS_CONNECTION_STRING"):
     from backends.local import search_products, search_images
 
     USE_COSMOSDB = False
@@ -103,40 +102,6 @@ def prep_search(query: str) -> str:
     ### End of implementation
     return search_query
 
-def fetch_embedding(input: str) -> list[float]:
-    embedding = client.embeddings.create(
-        input=input,
-        model=embeddings_deployment,
-        dimensions=1024,  # this is only supported in the text-embedding-3 models
-    )
-    return embedding.data[0].embedding
-
-
-def fetch_computer_vision_image_embedding(data: bytes | pathlib.Path, mimetype: str) -> list[float]:
-    if isinstance(data, pathlib.Path):
-        with open(data, "rb") as f:
-            data = f.read()
-
-    endpoint = urljoin(vision_endpoint, "computervision/retrieval:vectorizeImage")
-    headers = {"Content-Type": mimetype}
-    params = {"api-version": "2024-02-01", "model-version": "2023-04-15"}
-
-    if token_provider:  # Managed Identity
-        headers["Authorization"] = f"Bearer " + token_provider()
-    else:
-        headers['Ocp-Apim-Subscription-Key'] = vision_api_key
-
-    response = httpx.post(
-            url=endpoint, params=params, headers=headers, data=data 
-        )
-    if response.status_code != 200:
-        logging.error(f"Failed to fetch image embedding: {response.text}")
-
-    response.raise_for_status()
-    json = response.json()
-    image_query_vector = json["vector"]
-    return image_query_vector
-
 
 @app.route(methods=["post"], auth_level="anonymous",
                     route="search")
@@ -150,7 +115,7 @@ def search(req: func.HttpRequest) -> func.HttpResponse:
         )
 
     fts_query = prep_search(query)
-    embedding = fetch_embedding(query)
+    embedding = fetch_embedding(client, embeddings_deployment, query)
     sql_results = search_products(query, fts_query, embedding)
 
     return func.HttpResponse(json.dumps({
@@ -209,11 +174,11 @@ def match(req: func.HttpRequest) -> func.HttpResponse:
     embedding_source = req.form.get('embedding_source', 'text')
 
     if USE_COMPUTER_VISION and embedding_source == 'image':
-        image_embedding = fetch_computer_vision_image_embedding(image_contents, image_type)
+        image_embedding = fetch_computer_vision_image_embedding(vision_endpoint, vision_api_key, token_provider, image_contents, image_type)
         sql_results = search_images(image_embedding)[:max_items]
     else:
         # Do a product search with the text embedding
-        text_embedding = fetch_embedding(image_description)
+        text_embedding = fetch_embedding(client, embeddings_deployment, image_description)
         sql_results = search_products(image_description, image_description, text_embedding)[:max_items]
 
     return func.HttpResponse(json.dumps({
@@ -236,14 +201,18 @@ if USE_COSMOSDB:
         for doc in documents:
             has_changes = False
             # Determine if the name or description has changed
-            embedding = fetch_embedding(doc['name'] + " " + doc['description'])
+            embedding = fetch_embedding(client, embeddings_deployment, doc['name'] + " " + doc['description'])
             if doc.get(DESCRIPTION_EMBEDDING_FIELD) != embedding:
                 has_changes = True
                 doc[DESCRIPTION_EMBEDDING_FIELD] = embedding
                 logging.info(f"Updated embedding for {doc['name']}")
 
             if USE_COMPUTER_VISION:
-                image_embedding = fetch_computer_vision_image_embedding(pathlib.Path("../html/images/products/") / doc['image'], "image/jpeg")
+                image_embedding = fetch_computer_vision_image_embedding(vision_api_key=vision_api_key,
+                                                                        vision_endpoint=vision_endpoint,
+                                                                        token_provider=token_provider,
+                                                                        data=pathlib.Path("../html/images/products/") / doc['image'], 
+                                                                        mimetype="image/jpeg")
                 if doc.get(IMAGE_EMBEDDING_FIELD) != image_embedding:
                     has_changes = True
                     doc[IMAGE_EMBEDDING_FIELD] = image_embedding
@@ -252,42 +221,7 @@ if USE_COSMOSDB:
             if has_changes:
                 update_product(doc)
 
+if DEVELOPMENT:
+    from dev_functions import add_dev_functions
 
-@app.route(methods=["get"], auth_level="anonymous",
-           route="seed_embeddings")
-def seed_embeddings(req: func.HttpRequest) -> func.HttpResponse:
-    """
-    If you add a new product to the data/test.json file this will fetch the embeddings and the image embedding 
-    then add it to the JSON file.
-    """
-    diff = req.params.get('diff', False)
-    # Seed the embeddings for the products in the database by calling the OpenAI API
-    with open('data/test.json') as f:
-        data = json.load(f)
-        for product in data:
-            if diff and ('embedding' not in product or product['embedding'] is None):
-                update = True
-            if not diff:
-                update = True
-            if update:
-                product['embedding'] = fetch_embedding(product['name'] + ' ' + product['description'])
-                if USE_COMPUTER_VISION:
-                    product['image_embedding'] = fetch_computer_vision_image_embedding(pathlib.Path("../html/images/products/") / product['image'], "image/jpeg")
-
-        # Write the embeddings back to the test data
-        with open('data/test.json', 'w') as f:
-            json.dump(data, f)
-                
-        return func.HttpResponse("Successfully seeded embeddings")
-
-
-@app.route(methods=["get"], auth_level="anonymous",
-              route="seed_test_data")
-def seed_test_data(req: func.HttpRequest) -> func.HttpResponse:
-    """
-    Put some test data into the Azure Cosmos database
-    """
-    from backends.azure_cosmos import seed_test_data
-
-    seed_test_data()
-    return func.HttpResponse("Successfully seeded test data")
+    add_dev_functions(app, client, completions_deployment, embeddings_deployment, vision_api_key, vision_endpoint, token_provider, USE_COMPUTER_VISION)
