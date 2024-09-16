@@ -38,6 +38,9 @@ pip install -r src/api/requirements.txt
 5. Update local.settings.json file to integrate OpenAI models with backend app
 
 ```dotnetcli
+   {
+     "IsEncrypted": false,
+  "Values": { 
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",    
      "FUNCTIONS_WORKER_RUNTIME": "python",    
      "ImagesConnection": "UseDevelopmentStorage=true",    
@@ -45,7 +48,12 @@ pip install -r src/api/requirements.txt
      "AZURE_OPENAI_ENDPOINT": "<Insert end point>",
      "AZURE_OPENAI_KEY": "<Insert the openAI key>",    
      "CHAT_DEPLOYMENT_NAME": "gpt-4o-mini",    
-     "EMBEDDINGS_DEPLOYMENT_NAME": "text-embedding-3-small", 
+     "EMBEDDINGS_DEPLOYMENT_NAME": "text-embedding-3-small"
+},
+ "Host": {    
+        "CORS": "*" 
+     }
+    }
 ```
 
 5. Run the web server and start the backend function host server
