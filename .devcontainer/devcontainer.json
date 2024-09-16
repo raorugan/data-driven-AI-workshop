@@ -5,6 +5,7 @@
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
   "forwardPorts": [
     7071,
+    7072,
     10000,
     10001,
     10002
@@ -14,13 +15,12 @@
   },
   "features": {
     "ghcr.io/devcontainers/features/azure-cli:1": {},
-    "ghcr.io/jlaundry/devcontainer-features/azure-functions-core-tools:1": {},
-	"ghcr.io/devcontainers/features/docker-in-docker:2": {},
-	"ghcr.io/devcontainers/features/common-utils:2": {},
-	"ghcr.io/devcontainers/features/git:1": {},
-	"ghcr.io/devcontainers/features/python:1": {},
-	"ghcr.io/r3dpoint/devcontainer-features/tailwindcss-standalone-cli:1": {}
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+	  "ghcr.io/devcontainers/features/common-utils:2": {},
+	  "ghcr.io/devcontainers/features/git:1": {},
+	  "ghcr.io/r3dpoint/devcontainer-features/tailwindcss-standalone-cli:1": {}
   },
+  
   "customizations": {
     "vscode": {
       "extensions": [
@@ -29,7 +29,12 @@
         "ms-python.python",
         "bradlc.vscode-tailwindcss",
         "alexcvzz.vscode-sqlite"
-      ]
+      ],
+      "settings": {
+        "terminal.integrated.env.linux": {
+          "PYTHONPATH": "/workspaces/${localWorkspaceFolderBasename}/src/api"
+      }
+    }
     }
   }
 }

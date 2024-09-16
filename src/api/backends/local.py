@@ -134,5 +134,5 @@ def search_products(query: str, fts_query: str, embedding: list[float]) -> list[
         if product.id not in found_ids:
             results.append(product)
 
-    return list(results)
+    return list(results)[:10]
     

@@ -9,3 +9,7 @@ __tablestorage__/
 
 src/api/dev.db
 src/api/dev.db-journal
+local.settings.json
+
+# Ignore virtual environment directory
+.venv/

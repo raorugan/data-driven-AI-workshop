@@ -1,6 +1,60 @@
 # Data Driven AI Workshop
 
-## Running the web server
+# Pre-requisites
+
+1. Python 3.11(Required)
+2. Github account (Required)
+3. Docker Desktop
+4. An editor  – Vscode 
+[Download Visual Studio Code](https://code.visualstudio.com/Download)
+5. DevContainer Extension
+In the Visual Studio Code extensions view search for "Dev Containers" in search box and click on "Install" button
+6. Azure subscription  (Good to have) 
+
+## Running the App within the DevContainer
+1. Clone the project
+```dotnetcli
+git clone https://github.com/raorugan/data-driven-AI-workshop.git
+
+```
+2. Start the Dev container
+    a. Open a New Window in Visual Studio Code
+    b. Open the folder data-driven-workshop . Visual Studio Code will then build the Docker image specified in your .devcontainer/Dockerfile and start a container with the configuration specified in your .devcontainer/devcontainer.json file. Once the container is running, your project will be opened inside the container, and you can start working with it as if it were running locally.
+    
+  ```dotnetcli
+  cd /workspaces/data-driven-workshop
+  ```
+3. Create Python virtual Environment
+```dotnetcli
+    python -m venv .venv   
+    source .venv/bin/activate 
+```
+
+4. Install the required python packages
+```dotnetcli
+pip install -r src/api/requirements.txt
+```
+
+5. Update local.settings.json file to integrate OpenAI models with backend app
+
+```dotnetcli
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",    
+     "FUNCTIONS_WORKER_RUNTIME": "python",    
+     "ImagesConnection": "UseDevelopmentStorage=true",    
+     "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",    
+     "AZURE_OPENAI_ENDPOINT": "<Insert end point>",
+     "AZURE_OPENAI_KEY": "<Insert the openAI key>",    
+     "CHAT_DEPLOYMENT_NAME": "gpt-4o-mini",    
+     "EMBEDDINGS_DEPLOYMENT_NAME": "text-embedding-3-small", 
+```
+
+5. Run the web server and start the backend function host server
+```dotnetcli
+make runserver
+```
+
+
+## Running the web server outside DevContainer
 
 ```console
 npm install -g http-server
