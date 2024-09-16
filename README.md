@@ -21,6 +21,13 @@ git clone https://github.com/raorugan/data-driven-AI-workshop.git
     a. Make sure Docker Desktop is running in your local machine
     b. Open a New Window in Visual Studio Code
     c. Open the folder data-driven-AI-workshop . Visual Studio Code will then build the Docker image specified in your .devcontainer/Dockerfile and start a container with the configuration specified in your .devcontainer/devcontainer.json file. Once the container is running, your project will be opened inside the container, and you can start working with it as if it were running locally.
+
+   Look out for the VScode notification at the right bottom corner to start the Dev Container
+
+   ![image](https://github.com/user-attachments/assets/e00bf171-b085-4578-a258-710914146e22)
+
+
+   
     
   ```dotnetcli
   cd /workspaces/data-driven-AI-workshop
@@ -37,6 +44,8 @@ pip install -r src/api/requirements.txt
 ```
 
 5. Update local.settings.json file to integrate OpenAI models with backend app
+Make sure to include the local.settings.json under /src/api/ folder 
+   
 
 ```dotnetcli
    {
