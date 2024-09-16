@@ -22,7 +22,7 @@ git clone https://github.com/raorugan/data-driven-AI-workshop.git
     b. Open the folder data-driven-workshop . Visual Studio Code will then build the Docker image specified in your .devcontainer/Dockerfile and start a container with the configuration specified in your .devcontainer/devcontainer.json file. Once the container is running, your project will be opened inside the container, and you can start working with it as if it were running locally.
     
   ```dotnetcli
-  cd /workspaces/data-driven-workshop
+  cd /workspaces/data-driven-AI-workshop
   ```
 3. Create Python virtual Environment
 ```dotnetcli
