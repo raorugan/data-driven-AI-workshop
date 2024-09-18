@@ -4,7 +4,7 @@
 
 1. Python 3.11(Required)
 2. Github account (Required)
-3. Docker Desktop
+3. [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/)
 4. An editor  – Vscode 
 [Download Visual Studio Code](https://code.visualstudio.com/Download)
 5. DevContainer Extension
