@@ -56,7 +56,7 @@ indexing_policy = {
         }
     ],
     "vectorIndexes": [
-        {"path": "/{IMAGE_EMBEDDING_FIELD}", "type": "quantizedFlat"},
+        {"path": f"/{IMAGE_EMBEDDING_FIELD}", "type": "quantizedFlat"},
         {"path": f"/{DESCRIPTION_EMBEDDING_FIELD}", "type": "quantizedFlat"},
     ],
 }
